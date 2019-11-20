@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.UserMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.User">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="salt" jdbcType="TINYINT" property="salt"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="head_image_url" jdbcType="VARCHAR" property="headImageUrl"/>
+        <result column="total_score" jdbcType="BIGINT" property="totalScore"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, status, name, password, create_date, address, salt, phone, email, head_image_url, 
+    total_score
+  </sql>
+    <sql id="UserBO_Base_Column_List">
+    id, status, `name`, create_date, address, phone, email, total_score
+  </sql>
+    <!--查询-->
+    <!--根据手机号查询用户-->
+    <select id="getUserByPhone" parameterType="java.lang.String" resultType="com.example.springvue.pojo.vo.UserVO">
+        select
+        <include refid="UserBO_Base_Column_List"/>
+        from t_user
+        where phone = #{phone,jdbcType=VARCHAR}
+    </select>
+    <!--根据手机号查询密码盐-->
+    <select id="getSaltByPhone" parameterType="java.lang.String" resultType="java.lang.String">
+        select
+        salt
+        from t_user
+        where phone = #{phone,jdbcType=VARCHAR}
+    </select>
+    <!--根据手机号和密码查询用户-->
+    <select id="getUserByPhoneAndPassword" parameterType="com.example.springvue.pojo.dto.RegisterDTO"
+            resultType="com.example.springvue.pojo.bo.UserBO">
+        select
+        <include refid="UserBO_Base_Column_List"/>
+        from
+        t_user
+        where
+        phone = #{phone,jdbcType=VARCHAR}
+        and
+        password=#{password,jdbcType=VARCHAR}
+    </select>
+    <!--后台管理查询所有用户-->
+    <select id="getUserList" resultType="com.example.springvue.pojo.bo.UserBO">
+        select
+        <include refid="UserBO_Base_Column_List"/>
+        from
+        t_user
+    </select>
+    <!--后台根据用户名，用户状态动态查询-->
+    <select id="getUserListByParams" parameterType="com.example.springvue.pojo.dto.UserDTO"
+            resultType="com.example.springvue.pojo.bo.UserBO">
+        select
+        <include refid="UserBO_Base_Column_List"/>
+        from
+        t_user
+        <where>
+            <if test="status != null">
+                and status = #{status,jdbcType=BIT}
+            </if>
+            <if test="name != null">
+                and `name` like "%"#{name,jdbcType=VARCHAR}"%"
+            </if>
+        </where>
+    </select>
+    <!--前台查询用户信息-->
+    <select id="getUserInfo" parameterType="java.lang.Long" resultType="com.example.springvue.pojo.bo.UserInfoBO">
+        select
+            `name`, address, phone, email, total_score,head_image_url
+        from
+            t_user
+        where
+            id = #{id,jdbcType=INTEGER}
+    </select>
+    <!--获取收货人信息-->
+    <select id="getReceiver" parameterType="java.lang.Long" resultType="com.example.springvue.pojo.vo.ReceiverVO">
+        select
+            `name`,phone,address
+        from
+            t_user
+        where
+            id = #{id,jdbcType=INTEGER}
+    </select>
+    <!--增加-->
+    <insert id="insertUser" parameterType="com.example.springvue.pojo.dto.RegisterDTO">
+    insert into t_user (name, password, create_date,salt, phone)
+    values (#{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+    #{createDate,jdbcType=TIMESTAMP},#{salt,jdbcType=TINYINT},
+      #{phone,jdbcType=VARCHAR})
+    </insert>
+    <!--修改-->
+    <update id="updateUserStatusById" parameterType="com.example.springvue.pojo.dto.UserDTO">
+    update
+        t_user
+    set
+        status = #{status,jdbcType=BIT}
+    where
+        id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--用户修改信息-->
+    <update id="updateUserInfoByParams" parameterType="com.example.springvue.pojo.dto.UserInfoDTO">
+        update
+            t_user
+        set
+            `name` = #{name,jdbcType=VARCHAR},
+            address = #{address,jdbcType=VARCHAR},
+            phone = #{phone,jdbcType=VARCHAR},
+            email = #{email,jdbcType=VARCHAR}
+        where
+            id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--用户修改头像-->
+    <update id="updateUserHeadImageUrl" parameterType="com.example.springvue.pojo.dto.UserInfoDTO">
+        update
+            t_user
+        set
+            head_image_url = #{headImageUrl,jdbcType=VARCHAR}
+        where
+            id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--更新用户总积分-->
+    <update id="updateTotalScore">
+        update
+            t_user
+        set
+            total_score = total_score + #{totalScore,jdbcType=INTEGER}
+        where
+            id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

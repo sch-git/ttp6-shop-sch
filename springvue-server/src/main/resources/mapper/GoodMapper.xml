@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.GoodMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.Good">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="stock" jdbcType="INTEGER" property="stock"/>
+        <result column="price" jdbcType="BIGINT" property="price"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="create_by" jdbcType="BIGINT" property="createBy"/>
+        <result column="creator_name" jdbcType="VARCHAR" property="creatorName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_modify_by" jdbcType="BIGINT" property="lastModifyBy"/>
+        <result column="last_modifier_name" jdbcType="VARCHAR" property="lastModifierName"/>
+        <result column="last_modify_time" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, name, stock, price, status, create_by, creator_name, create_time, last_modify_by, 
+    last_modifier_name, last_modify_time, description
+  </sql>
+    <sql id="GoodBO_Base_Column_List">
+    id, `name`, stock, price, status, creator_name, create_time,
+    last_modifier_name, last_modify_time, description
+  </sql>
+    <!--增加-->
+    <!--添加商品-->
+    <insert id="insertGood" parameterType="com.example.springvue.pojo.dto.GoodDTO">
+        insert into
+        t_good
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="stock != null">
+                stock,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="creatorName != null">
+                creator_name,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="lastModifyBy != null">
+                last_modify_by,
+            </if>
+            <if test="lastModifierName != null">
+                last_modifier_name,
+            </if>
+            <if test="lastModifyTime != null">
+                last_modify_time,
+            </if>
+            <if test="description != null">
+                description,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="stock != null">
+                #{stock,jdbcType=INTEGER},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=BIGINT},
+            </if>
+            <if test="creatorName != null">
+                #{creatorName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifyBy != null">
+                #{lastModifyBy,jdbcType=BIGINT},
+            </if>
+            <if test="lastModifierName != null">
+                #{lastModifierName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastModifyTime != null">
+                #{lastModifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <!--查询-->
+    <!--查询所有商品-->
+    <select id="getGoodList" resultType="com.example.springvue.pojo.bo.GoodBO">
+        select
+        <include refid="Base_Column_List"/>
+        from t_good
+    </select>
+    <!--模糊查询商品-->
+    <select id="getGoodListByParams" parameterType="com.example.springvue.pojo.dto.GoodCategoryDTO"
+            resultType="com.example.springvue.pojo.bo.GoodBO">
+        select distinct
+        tg.id, tg.name, tg.stock, tg.price, tg.status, tg.creator_name, tg.create_time,
+        tg.last_modifier_name, tg.last_modify_time, tg.description
+        from t_good tg
+        left join t_good_category tgc
+        on tg.id=tgc.good_id
+        left join t_category c
+        on tgc.category_id=c.id
+        <where>
+            <if test="categoryId != null">
+                and c.id=#{categoryId,jdbcType=INTEGER} or c.parent_category_id=#{categoryId,jdbcType=INTEGER}
+            </if>
+            <if test="goodName != null">
+                and tg.name like "%"#{goodName,jdbcType=VARCHAR}"%"
+            </if>
+        </where>
+    </select>
+    <!--根据分类id查询该分类及其子类的商品-->
+    <select id="getUserGoodByCategoryId" parameterType="java.lang.Long"
+            resultType="com.example.springvue.pojo.bo.UserGoodBO">
+        select distinct
+        tg.id, tg.name, tg.stock, tg.price,tg.description,tgi.url
+        from t_good tg
+        left join t_good_category tgc
+        on tg.id=tgc.good_id
+        left join t_category c
+        on tgc.category_id=c.id
+		left join t_good_image tgi
+		on tg.id=tgi.good_id
+		where tg.status!=0 and (c.id=#{id,jdbcType=INTEGER} or c.parent_category_id=#{id,jdbcType=INTEGER}) and tgi.type=0
+		limit 5
+    </select>
+    <!--用户查询商品-->
+    <select id="getUserGoodByParams" parameterType="com.example.springvue.pojo.dto.UserSearchGoodDTO"
+            resultType="com.example.springvue.pojo.bo.UserGoodBO">
+        select distinct tg.id,tg.name,tg.stock,tg.price,tg.description,tgi.url
+        from t_good tg
+        left join t_good_category tgc
+        on tg.id=tgc.good_id
+        left join t_good_image tgi
+        on tgi.good_id=tg.id
+        <where>
+            tgi.type=0
+            and tg.status=1
+            <if test="id != null">
+                and tgc.category_id=#{id,jdbcType=INTEGER}
+            </if>
+            <if test="name != null">
+                and tg.name like "%"#{name,jdbcType=VARCHAR}"%"
+            </if>
+        </where>
+    </select>
+    <!--商品基本信息-->
+    <select id="getGoodInfoById" parameterType="java.lang.Long"
+            resultType="com.example.springvue.pojo.bo.GoodInfoBO">
+        select id,name,stock,price,description
+        from t_good
+        where id=#{id,jdbcType=INTEGER}
+    </select>
+    <!--修改-->
+    <!--修改商品状态-->
+    <update id="updateGoodStatus" parameterType="com.example.springvue.pojo.dto.GoodDTO">
+        update
+        t_good
+        set
+        status = #{status,jdbcType=TINYINT},
+        last_modify_by = #{lastModifyBy,jdbcType=BIGINT},
+        last_modifier_name = #{lastModifierName,jdbcType=VARCHAR},
+        last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP}
+        where
+        id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--动态修改商品数据-->
+    <update id="updateGood" parameterType="com.example.springvue.pojo.dto.GoodDTO">
+        update t_good
+        <set>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="stock != null">
+                stock = #{stock,jdbcType=INTEGER},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="lastModifyBy != null">
+                last_modify_by = #{lastModifyBy,jdbcType=BIGINT},
+            </if>
+            <if test="lastModifierName != null">
+                last_modifier_name = #{lastModifierName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastModifyTime != null">
+                last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="description != null">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--生成订单，更新商品库存-->
+    <update id="updateGoodStock">
+        update
+            t_good
+        set
+            stock =stock-#{stock,jdbcType=INTEGER}
+        where
+            id=#{id,jdbcType=INTEGER}
+    </update>
+    <!--取消订单后恢复商品库存-->
+    <update id="restoreGoodStock">
+                update
+            t_good
+        set
+            stock =stock+#{stock,jdbcType=INTEGER}
+        where
+            id=#{id,jdbcType=INTEGER}
+    </update>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.Order">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="pay_date" jdbcType="TIMESTAMP" property="payDate"/>
+        <result column="delete_time" jdbcType="TIMESTAMP" property="deleteTime"/>
+        <result column="receiver" jdbcType="VARCHAR" property="receiver"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="total_price" jdbcType="BIGINT" property="totalPrice"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, user_id, order_no, status, address, create_date, pay_date, delete_time, receiver, 
+    phone, total_price
+  </sql>
+    <!--增加订单-->
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.example.springvue.pojo.dto.OrderDTO">
+    insert into
+        t_order
+        (user_id, order_no, status, address, create_date, receiver, phone, total_price)
+    values (#{userId,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR},
+      #{status,jdbcType=TINYINT}, #{address,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
+      #{receiver,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{totalPrice,jdbcType=BIGINT})
+    </insert>
+    <!--前台根据用户id查询订单-->
+    <select id="getOrderListByUserId" parameterType="java.lang.Long" resultType="com.example.springvue.pojo.bo.OrderBO">
+        select tor.id 'id',status,order_no,address,receiver,phone,total_price,count(tor.id) 'number'
+        from t_order tor
+        left join t_order_item toi
+        on toi.order_id=tor.id
+        where tor.user_id=#{userId,jdbcType=INTEGER}
+        GROUP BY tor.id
+    </select>
+    <!--后台查询订单-->
+    <select id="getOrderList" resultType="com.example.springvue.pojo.bo.OrderAdminBO">
+        select
+            id,order_no, status, address, create_date, receiver,phone, total_price
+        from
+            t_order
+    </select>
+    <!--后台根据订单状态查询订单-->
+    <select id="getOrderListByStatus"
+            resultType="com.example.springvue.pojo.bo.OrderAdminBO">
+        select
+        id,order_no, status, address, create_date, receiver,phone, total_price
+        from
+        t_order
+        <where>
+            <if test="_parameter  != null">
+                and status = #{_parameter ,jdbcType=BIT}
+            </if>
+        </where>
+    </select>
+    <!--取消订单-->
+    <update id="updateOrderStatusById" parameterType="com.example.springvue.pojo.dto.CancelOrderDTO">
+        update
+            t_order
+        set
+            status = #{status ,jdbcType=BIT},
+            delete_time = #{deleteTime,jdbcType=TIMESTAMP}
+        where
+            id=#{id,jdbcType=INTEGER}
+    </update>
+    <!--完成订单-->
+    <update id="updateOrderPayDateById" parameterType="com.example.springvue.pojo.dto.SuccessOrderDTO">
+        update
+            t_order
+        set
+            status = #{status ,jdbcType=BIT},
+            pay_date = #{payDate,jdbcType=TIMESTAMP}
+        where
+            id=#{id,jdbcType=INTEGER}
+    </update>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.PropertyValueMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.PropertyValue">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="property_id" jdbcType="INTEGER" property="propertyId"/>
+        <result column="good_id" jdbcType="INTEGER" property="goodId"/>
+        <result column="value" jdbcType="VARCHAR" property="value"/>
+        <result column="create_by" jdbcType="BIGINT" property="createBy"/>
+        <result column="creator_name" jdbcType="VARCHAR" property="creatorName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_modify_by" jdbcType="BIGINT" property="lastModifyBy"/>
+        <result column="last_modifier_name" jdbcType="VARCHAR" property="lastModifierName"/>
+        <result column="last_modify_time" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, property_id, good_id, value, create_by, creator_name, create_time, last_modify_by, 
+    last_modifier_name, last_modify_time
+  </sql>
+    <sql id="PropertyValueBO_Base_Column_List">
+    id, `value`, creator_name, create_time,
+    last_modifier_name, last_modify_time
+  </sql>
+    <!--增加商品属性值-->
+    <insert id="insertGoodPropertyValue" parameterType="com.example.springvue.pojo.dto.PropertyValueDTO">
+      insert into t_property_value
+      (property_id, good_id,
+          `value`, create_by, creator_name,
+          create_time, last_modify_by, last_modifier_name,
+          last_modify_time)
+        values (#{propertyId,jdbcType=INTEGER}, #{goodId,jdbcType=INTEGER},
+      #{value,jdbcType=VARCHAR}, #{createBy,jdbcType=BIGINT}, #{creatorName,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{lastModifyBy,jdbcType=BIGINT}, #{lastModifierName,jdbcType=VARCHAR},
+      #{lastModifyTime,jdbcType=TIMESTAMP})
+</insert>
+    <!--查询-->
+    <!--根据属性id查询所有属值-->
+    <select id="getPropertyValueByPropertyId" parameterType="java.lang.Long"
+            resultType="com.example.springvue.pojo.bo.PropertyValueBO">
+        select
+        <include refid="PropertyValueBO_Base_Column_List"/>
+        from
+        t_property_value
+        where
+        property_id=#{propertyId,jdbcType=INTEGER}
+    </select>
+    <!--修改-->
+    <!--根据id修改属性值-->
+    <update id="updatePropertyValueById" parameterType="com.example.springvue.pojo.dto.PropertyValueDTO">
+    update t_property_value
+    set
+    `value` = #{value,jdbcType=VARCHAR},
+    last_modify_by = #{lastModifyBy,jdbcType=BIGINT},
+    last_modifier_name = #{lastModifierName,jdbcType=VARCHAR},
+    last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

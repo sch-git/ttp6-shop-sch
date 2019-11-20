@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.CategoryMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.Category">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="parent_category_id" jdbcType="INTEGER" property="parentCategoryId"/>
+        <result column="create_by" jdbcType="BIGINT" property="createBy"/>
+        <result column="creator_name" jdbcType="VARCHAR" property="creatorName"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_modify_by" jdbcType="BIGINT" property="lastModifyBy"/>
+        <result column="last_modifier_name" jdbcType="VARCHAR" property="lastModifierName"/>
+        <result column="last_modify_time" jdbcType="TIMESTAMP" property="lastModifyTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, `name`, status, parent_category_id, create_by, creator_name, create_time, last_modify_by,
+    last_modifier_name, last_modify_time
+  </sql>
+    <sql id="CategoryBO_Base_Column_List">
+    id, `name`, status, parent_category_id, creator_name, create_time,
+    last_modifier_name, last_modify_time
+  </sql>
+    <!--增加-->
+    <!--增加分类-->
+    <insert id="insertCategory" parameterType="com.example.springvue.pojo.dto.CategoryDTO">
+        insert into
+        t_category
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            `name`, create_by, creator_name,
+            create_time, last_modify_by, last_modifier_name,
+            last_modify_time,
+            <if test="parentCategoryId != null">
+                parent_category_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{name,jdbcType=VARCHAR}, #{createBy,jdbcType=BIGINT}, #{creatorName,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP}, #{lastModifyBy,jdbcType=BIGINT}, #{lastModifierName,jdbcType=VARCHAR},
+            #{lastModifyTime,jdbcType=TIMESTAMP},
+            <if test="parentCategoryId != null">
+                #{parentCategoryId,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <!--查询-->
+    <!--查询状态正常的父分类-->
+    <select id="getParentCategoryNameList" resultType="com.example.springvue.pojo.bo.CategoryBO">
+        select
+        <include refid="CategoryBO_Base_Column_List"/>
+        from
+        t_category
+        where
+        status=1
+        and
+        parent_category_id=0
+    </select>
+    <!--查询分类-->
+    <select id="getCategoryList" resultType="com.example.springvue.pojo.bo.CategoryBO">
+        select
+        <include refid="CategoryBO_Base_Column_List"/>
+        from
+        t_category
+    </select>
+    <!--根据分类id查询父分类-->
+    <select id="getParentCategoryById" resultType="com.example.springvue.pojo.bo.CategoryBO"
+            parameterType="java.lang.Long">
+        select
+        <include refid="CategoryBO_Base_Column_List"/>
+        from
+        t_category
+        where
+        id=#{id,jdbcType=INTEGER}
+    </select>
+    <!--模糊查询-->
+    <select id="getCategoryListByParams" parameterType="com.example.springvue.pojo.dto.CategoryDTO"
+            resultType="com.example.springvue.pojo.bo.CategoryBO">
+        select
+        <include refid="CategoryBO_Base_Column_List"/>
+        from
+        t_category
+        <where>
+            <if test="status != null">
+                and status = #{status,jdbcType=BIT}
+            </if>
+            <if test="name != null">
+                and `name` like "%"#{name,jdbcType=VARCHAR}"%"
+            </if>
+        </where>
+    </select>
+    <!--前台-首页查询父分类-->
+    <select id="getParentCategoryList" resultType="com.example.springvue.pojo.bo.UserCategoryBO">
+        select distinct tgc.category_id 'id',tgc.category_name 'name'
+        from t_good_category tgc
+        left join t_good tg
+        on tg.id=tgc.good_id
+        left join t_category tc
+        on tc.id=tgc.category_id
+        where tg.status!=0 and tc.status!=0 and tc.parent_category_id=0
+    </select>
+    <!--修改-->
+    <!--修改分类状态-->
+    <update id="updateCategoryStatus" parameterType="com.example.springvue.pojo.dto.CategoryDTO">
+    update
+        t_category
+    set
+        status = #{status,jdbcType=BIT},
+        last_modify_by = #{lastModifyBy,jdbcType=BIGINT},
+        last_modifier_name = #{lastModifierName,jdbcType=VARCHAR},
+        last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP}
+    where
+        id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--修改分类-->
+    <update id="updateCategory" parameterType="com.example.springvue.pojo.dto.CategoryDTO">
+    update
+        t_category
+    set
+        `name` = #{name,jdbcType=VARCHAR},
+        status = #{status,jdbcType=BIT},
+        parent_category_id = #{parentCategoryId,jdbcType=INTEGER},
+        last_modify_by = #{lastModifyBy,jdbcType=BIGINT},
+        last_modifier_name = #{lastModifierName,jdbcType=VARCHAR},
+        last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP}
+    where
+        id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

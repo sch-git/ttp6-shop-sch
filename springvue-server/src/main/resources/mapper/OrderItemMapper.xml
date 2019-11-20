@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.OrderItemMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.OrderItem">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="order_id" jdbcType="INTEGER" property="orderId"/>
+        <result column="good_id" jdbcType="INTEGER" property="goodId"/>
+        <result column="good_name" jdbcType="VARCHAR" property="goodName"/>
+        <result column="number" jdbcType="INTEGER" property="number"/>
+        <result column="price" jdbcType="BIGINT" property="price"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, order_id, good_id, good_name, number, price, url
+  </sql>
+    <!--增加订单项-->
+    <insert id="insertOrderItemList" parameterType="com.example.springvue.pojo.dto.OrderItemDTO">
+        insert into
+        t_order_item
+        (order_id, good_id, good_name, `number`, price, url)
+        values
+        <foreach collection="list" index="index" separator="," item="item">
+            (#{item.orderId,jdbcType=INTEGER},#{item.goodId,jdbcType=INTEGER}
+            ,#{item.goodName,jdbcType=VARCHAR},#{item.number,jdbcType=INTEGER},
+            #{item.price,jdbcType=BIGINT},#{item.url,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <!--前台查询订单详情-->
+    <select id="getOrderItemList" parameterType="java.lang.Long" resultType="com.example.springvue.pojo.bo.OrderItemBO">
+        select
+            good_id 'id',good_name 'name',`number`,price,url
+        from
+            t_order_item
+        where
+            order_id=#{orderId,jdbcType=INTEGER}
+    </select>
+</mapper>

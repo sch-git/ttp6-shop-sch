@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springvue.dao.AdminMapper">
+    <resultMap id="BaseResultMap" type="com.example.springvue.entity.Admin">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, `name`, password
+  </sql>
+    <sql id="AdminVO_Base_Column_List">
+    id, `name`
+  </sql>
+    <!--查询-->
+    <!--根据用户名密码查询管理员-->
+    <select id="getAdminByNameAndPassword" parameterType="com.example.springvue.pojo.dto.AdminDTO"
+            resultType="com.example.springvue.pojo.vo.AdminVO">
+        select
+        <include refid="AdminVO_Base_Column_List"/>
+        from
+        t_admin
+        where
+        `name` = #{name,jdbcType=VARCHAR}
+        and
+        password=#{password,jdbcType=VARCHAR}
+    </select>
+</mapper>
