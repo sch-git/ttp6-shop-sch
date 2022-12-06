@@ -11,7 +11,7 @@
     "core-js": "^2.6.5",
     "element-china-area-data": "^4.1.2",
     "element-ui": "^2.4.5",
-    "qs": "^6.9.0",
+    "qs": "^6.9.7",
     "vue": "^2.6.10",
     "vue-ele-image": "^1.0.2",
     "vue-router": "^3.0.3",
